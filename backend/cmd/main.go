@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	"github.com/ramzyrsr/digital-library/config"
 )
 
 func main() {
@@ -13,6 +14,12 @@ func main() {
 		log.Printf("error loading .env file: %v", err)
 		return
 	}
+
+	db, err := config.ConnectDB()
+	if err != nil {
+		log.Fatalf("Database connection failed: %v", err)
+	}
+	defer db.Close()
 
 	app := fiber.New()
 
