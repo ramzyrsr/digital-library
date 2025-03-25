@@ -7,6 +7,8 @@ import (
 	"github.com/ramzyrsr/digital-library/internal/entity"
 	"github.com/ramzyrsr/digital-library/internal/middleware"
 	"github.com/ramzyrsr/digital-library/internal/repository"
+	"github.com/ramzyrsr/digital-library/pkg"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
@@ -43,4 +45,31 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	return middleware.Response(c, fiber.StatusCreated, "User registered successfully", nil)
+}
+
+func (h *AuthHandler) Login(c *fiber.Ctx) error {
+	var req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Invalid input", nil)
+	}
+
+	user, err := h.UserRepo.GetUserByEmail(req.Email)
+	if err != nil {
+		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", nil)
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password 2", nil)
+	}
+
+	token, err := pkg.GenerateJWT(user.ID)
+	if err != nil {
+		return middleware.Response(c, fiber.StatusInternalServerError, "Failed to generate token", nil)
+	}
+
+	return middleware.Response(c, fiber.StatusOK, token, nil)
 }
