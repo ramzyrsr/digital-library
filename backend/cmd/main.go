@@ -7,6 +7,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/ramzyrsr/digital-library/config"
+	"github.com/ramzyrsr/digital-library/internal/handler"
+	"github.com/ramzyrsr/digital-library/internal/middleware"
+	"github.com/ramzyrsr/digital-library/internal/repository"
 )
 
 func main() {
@@ -27,6 +30,16 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "Welcome to the Digital Library API!"})
 	})
+
+	// Initialize Repositories & Handlers
+	userRepo := &repository.UserRepository{DB: db}
+	authHandler := &handler.AuthHandler{UserRepo: userRepo}
+
+	// Auth Routes
+	app.Post("/register", authHandler.Register)
+	app.Post("/login", authHandler.Login)
+
+	app.Use(middleware.JWTMiddleware())
 
 	// Start server
 	port := os.Getenv("PORT")
