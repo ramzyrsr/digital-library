@@ -49,6 +49,7 @@ func main() {
 	app.Get("/books/search", bookHandler.GetBooksByTitle)
 	app.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
 	app.Post("/lending/book", middleware.StaffOnlyMiddleware(), lendingHandler.BorrowBook)
+	app.Put("/lending/return/:id", middleware.StaffOnlyMiddleware(), lendingHandler.ReturnBook)
 
 	// Start server
 	port := os.Getenv("PORT")
