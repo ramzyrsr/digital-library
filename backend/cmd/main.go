@@ -36,6 +36,8 @@ func main() {
 	authHandler := &handler.AuthHandler{UserRepo: userRepo}
 	bookRepo := &repository.BookRepository{DB: db}
 	bookHandler := &handler.BookHandler{BookRepo: bookRepo}
+	lendingRepo := &repository.LendingRepository{DB: db}
+	lendingHandler := &handler.LendingHandler{LendingRepo: lendingRepo}
 
 	// Auth Routes
 	app.Post("/register", authHandler.Register)
@@ -46,6 +48,7 @@ func main() {
 	app.Get("/books", bookHandler.GetBooks)
 	app.Get("/books/search", bookHandler.GetBooksByTitle)
 	app.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
+	app.Post("/lending/book", middleware.StaffOnlyMiddleware(), lendingHandler.BorrowBook)
 
 	// Start server
 	port := os.Getenv("PORT")
