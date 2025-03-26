@@ -77,3 +77,32 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	return middleware.Response(c, fiber.StatusOK, token, nil)
 }
+
+func (h *AuthHandler) CreateMember(c *fiber.Ctx) error {
+	var req struct {
+		UserID uint   `json:"user_id"`
+		Name   string `json:"name"`
+		Email  string `json:"email"`
+		Phone  string `json:"phone"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Invalid input", nil)
+	}
+
+	userID := c.Locals("user_id").(uint)
+
+	user := &entity.Member{
+		UserID: userID,
+		Name:   req.Name,
+		Email:  req.Email,
+		Phone:  req.Phone,
+	}
+
+	err := h.UserRepo.CreateMember(user)
+	if err != nil {
+		return middleware.Response(c, fiber.StatusConflict, "Failed to register member", err.Error())
+	}
+
+	return middleware.Response(c, fiber.StatusCreated, "Member registered successfully", nil)
+}
