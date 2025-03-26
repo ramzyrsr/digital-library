@@ -12,3 +12,7 @@ type BorrowingTrends struct {
 	BorrowCount uint   `json:"borrow_count"`
 }
 
+type BookCategoryDistribution struct {
+	CategoryName string `json:"category_name"`
+	BookCount    uint   `json:"book_count"`
+}
