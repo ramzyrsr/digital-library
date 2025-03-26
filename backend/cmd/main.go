@@ -45,6 +45,7 @@ func main() {
 	app.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
 	app.Get("/books", bookHandler.GetBooks)
 	app.Get("/books/search", bookHandler.GetBooksByTitle)
+	app.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
 
 	// Start server
 	port := os.Getenv("PORT")
