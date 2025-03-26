@@ -39,3 +39,31 @@ func (r *AnalyticsRepository) GetMostBorrowedBooks(limit int) ([]entity.BookAnal
 	}
 	return books, nil
 }
+
+func (r *AnalyticsRepository) GetMonthlyBorrowingTrends() ([]entity.BorrowingTrends, error) {
+	query := `SELECT 
+		DATE_TRUNC('month', borrowed_date) as month, COUNT(id) as borrow_count
+	FROM
+		lending
+	GROUP BY 
+		month
+	ORDER BY
+		month
+	`
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var trends []entity.BorrowingTrends
+	for rows.Next() {
+		var trend entity.BorrowingTrends
+		if err := rows.Scan(&trend.Month, &trend.BorrowCount); err != nil {
+			return nil, err
+		}
+		trends = append(trends, trend)
+	}
+	return trends, nil
+}
+
