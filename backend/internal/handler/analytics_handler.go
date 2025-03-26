@@ -32,3 +32,11 @@ func (h *AnalyticsHandler) MonthlyBorrowingTrends(c *fiber.Ctx) error {
 	return middleware.Response(c, fiber.StatusOK, "Success to retrieve data", trends)
 }
 
+func (h *AnalyticsHandler) GetBooksByCategory(c *fiber.Ctx) error {
+	data, err := h.AnalyticsRepo.GetBooksByCategory()
+	if err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Failed to fetch books by category", err.Error())
+	}
+
+	return middleware.Response(c, fiber.StatusOK, "Success to retrieve data", data)
+}
