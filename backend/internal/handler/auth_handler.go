@@ -63,10 +63,10 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password 2", nil)
+		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", nil)
 	}
 
-	token, err := pkg.GenerateJWT(user.ID)
+	token, err := pkg.GenerateJWT(user.ID, user.Role)
 	if err != nil {
 		return middleware.Response(c, fiber.StatusInternalServerError, "Failed to generate token", nil)
 	}
