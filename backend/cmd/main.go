@@ -38,6 +38,8 @@ func main() {
 	bookHandler := &handler.BookHandler{BookRepo: bookRepo}
 	lendingRepo := &repository.LendingRepository{DB: db}
 	lendingHandler := &handler.LendingHandler{LendingRepo: lendingRepo}
+	analyticsRepo := &repository.AnalyticsRepository{DB: db}
+	analyticsHandler := &handler.AnalyticsHandler{AnalyticsRepo: analyticsRepo}
 
 	// Auth Routes
 	app.Post("/register", authHandler.Register)
@@ -50,6 +52,9 @@ func main() {
 	app.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
 	app.Post("/lending/book", middleware.StaffOnlyMiddleware(), lendingHandler.BorrowBook)
 	app.Put("/lending/return/:id", middleware.StaffOnlyMiddleware(), lendingHandler.ReturnBook)
+	app.Get("/analytics/most-borrowed", analyticsHandler.MostBorrowedBooks)
+	app.Get("/analytics/borrowing-trends", analyticsHandler.MonthlyBorrowingTrends)
+	app.Get("/analytics/books-by-category", analyticsHandler.GetBooksByCategory)
 
 	// Start server
 	port := os.Getenv("PORT")
