@@ -47,3 +47,20 @@ func (h *BookHandler) GetBooks(c *fiber.Ctx) error {
 	})
 }
 
+func (h *BookHandler) GetBooksByTitle(c *fiber.Ctx) error {
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	offset, _ := strconv.Atoi(c.Query("offset", "0"))
+	filter := c.Query("title", "")
+
+	books, totalBookFiltered, totalBook, err := h.BookRepo.GetBooksByTitle(limit, offset, filter)
+	if err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Failed to retrieve books", nil)
+	}
+
+	return middleware.Response(c, fiber.StatusOK, "Success to retrieve book", map[string]interface{}{
+		"data":                books,
+		"total_data":          totalBookFiltered,
+		"total_data_filtered": totalBook,
+	})
+}
+
