@@ -22,3 +22,13 @@ func (h *AnalyticsHandler) MostBorrowedBooks(c *fiber.Ctx) error {
 
 	return middleware.Response(c, fiber.StatusOK, "Success to retrieve data", books)
 }
+
+func (h *AnalyticsHandler) MonthlyBorrowingTrends(c *fiber.Ctx) error {
+	trends, err := h.AnalyticsRepo.GetMonthlyBorrowingTrends()
+	if err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Failed to retrieve data", err.Error())
+	}
+
+	return middleware.Response(c, fiber.StatusOK, "Success to retrieve data", trends)
+}
+
