@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/ramzyrsr/digital-library/internal/entity"
 	"github.com/ramzyrsr/digital-library/internal/middleware"
@@ -27,4 +29,14 @@ func (h *LendingHandler) BorrowBook(c *fiber.Ctx) error {
 	return middleware.Response(c, fiber.StatusCreated, "Success to borrow book", map[string]interface{}{
 		"id": req.ID,
 	})
+}
+
+func (h *LendingHandler) ReturnBook(c *fiber.Ctx) error {
+	lendingID, _ := strconv.Atoi(c.Params("id"))
+
+	if err := h.LendingRepo.ReturnBook(lendingID); err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Failed to return book", err.Error())
+	}
+
+	return middleware.Response(c, fiber.StatusOK, "Success to returned book", nil)
 }
