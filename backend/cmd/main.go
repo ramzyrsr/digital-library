@@ -43,6 +43,7 @@ func main() {
 
 	app.Use(middleware.JWTMiddleware())
 	app.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
+	app.Get("/books", bookHandler.GetBooks)
 
 	// Start server
 	port := os.Getenv("PORT")
