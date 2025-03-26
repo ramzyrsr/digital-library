@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -42,4 +43,16 @@ func JWTMiddleware() fiber.Handler {
 
 		return c.Next()
 	}
+}
+
+func GenerateJWT(userID int, role string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"role":    role,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
 }
