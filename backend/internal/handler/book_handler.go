@@ -64,3 +64,12 @@ func (h *BookHandler) GetBooksByTitle(c *fiber.Ctx) error {
 	})
 }
 
+func (h *BookHandler) DeleteBook(c *fiber.Ctx) error {
+	bookID, _ := strconv.Atoi(c.Params("id"))
+
+	if err := h.BookRepo.DeleteBook(bookID); err != nil {
+		return middleware.Response(c, fiber.StatusBadRequest, "Failed to delete book", nil)
+	}
+
+	return middleware.Response(c, fiber.StatusOK, "Book deleted successfully", nil)
+}
