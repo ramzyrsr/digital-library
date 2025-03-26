@@ -7,7 +7,6 @@ import (
 	"github.com/ramzyrsr/digital-library/internal/entity"
 	"github.com/ramzyrsr/digital-library/internal/middleware"
 	"github.com/ramzyrsr/digital-library/internal/repository"
-	"github.com/ramzyrsr/digital-library/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -71,7 +70,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", nil)
 	}
 
-	token, err := pkg.GenerateJWT(user.ID, user.Role)
+	token, err := middleware.GenerateJWT(user.ID, user.Role)
 	if err != nil {
 		return middleware.Response(c, fiber.StatusInternalServerError, "Failed to generate token", nil)
 	}
