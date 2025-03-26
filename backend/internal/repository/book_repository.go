@@ -74,3 +74,9 @@ func (r *BookRepository) GetBooksByTitle(limit, offset int, filter string) ([]en
 	return books, len(books), totalData, nil
 }
 
+func (r *BookRepository) DeleteBook(bookID int) error {
+	query := `DELETE FROM books WHERE id = $1`
+	_, err := r.DB.Exec(query, bookID)
+
+	return err
+}
