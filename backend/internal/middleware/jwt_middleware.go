@@ -16,7 +16,7 @@ func JWTMiddleware() fiber.Handler {
 
 		tokenString := authHeader[7:] // Skip "Bearer " part
 
-		_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid signing method")
 			}
@@ -26,6 +26,19 @@ func JWTMiddleware() fiber.Handler {
 		if err != nil {
 			return Response(c, fiber.StatusUnauthorized, "Unauthorized", err.Error())
 		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			return Response(c, fiber.StatusUnauthorized, "Invalid token claims", nil)
+		}
+
+		userID, ok := claims["user_id"].(float64)
+		if !ok {
+			return Response(c, fiber.StatusUnauthorized, "User ID not found in token", nil)
+		}
+
+		c.Locals("user_id", uint(userID))
+		c.Locals("user", token)
 
 		return c.Next()
 	}
