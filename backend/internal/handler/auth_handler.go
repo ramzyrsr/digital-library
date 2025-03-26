@@ -31,6 +31,11 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return middleware.Response(c, fiber.StatusBadRequest, "All fields are required", nil)
 	}
 
+	existingUser, err := h.UserRepo.GetUserByEmail(req.Email)
+	if err == nil && existingUser != nil {
+		return middleware.Response(c, fiber.StatusConflict, "Email is already registered", nil)
+	}
+
 	user := &entity.User{
 		Name:     req.Name,
 		Email:    req.Email,
@@ -38,7 +43,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Role:     req.Role,
 	}
 
-	err := h.UserRepo.CreateUser(user)
+	err = h.UserRepo.CreateUser(user)
 	if err != nil {
 		log.Println("Error creating user:", err)
 		return middleware.Response(c, fiber.StatusConflict, "Failed to register user", nil)
