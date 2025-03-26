@@ -39,3 +39,29 @@ func (r *LendingRepository) BorrowBook(lending *entity.Lending) error {
 
 	return err
 }
+
+func (r *LendingRepository) ReturnBook(lendingID int) error {
+	var bookID int
+	var returnDate interface{}
+
+	query := `SELECT return_date, book_id FROM lending WHERE id = $1`
+	err := r.DB.QueryRow(query, lendingID).Scan(&returnDate, &bookID)
+	if err != nil {
+		return err
+	}
+
+	if returnDate != nil {
+		return errors.New("book has already been returned")
+	}
+
+	query = `UPDATE lending SET return_date = NOW(), status = $1 WHERE id = $2`
+	_, err = r.DB.Exec(query, "returned", lendingID)
+	if err != nil {
+		return err
+	}
+
+	query = `UPDATE book_status SET borrowed_qty = borrowed_qty - 1 WHERE book_id = $1`
+	_, err = r.DB.Exec(query, bookID)
+
+	return err
+}
