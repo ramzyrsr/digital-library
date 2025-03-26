@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,6 +14,10 @@ func JWTMiddleware() fiber.Handler {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
 			return Response(c, fiber.StatusUnauthorized, "Authorization header missing", nil)
+		}
+
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			return Response(c, fiber.StatusUnauthorized, "Invalid Authorization header format", nil)
 		}
 
 		tokenString := authHeader[7:] // Skip "Bearer " part

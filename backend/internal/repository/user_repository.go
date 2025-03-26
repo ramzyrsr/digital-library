@@ -32,7 +32,7 @@ func (r *UserRepository) GetUserByEmail(email string) (*entity.User, error) {
 	err := r.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Role, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, errors.New("user not found")
 		}
 		return nil, err
 	}

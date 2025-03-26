@@ -13,7 +13,7 @@ type LendingRepository struct {
 
 func (r *LendingRepository) BorrowBook(lending *entity.Lending) error {
 	var totalAvailable int
-	query := `SELET CASE
+	query := `SELECT CASE
 		WHEN 
 			available_qty - borrowed_qty < 0 THEN 0
 			ELSE available_qty - borrowed_qty
@@ -23,6 +23,9 @@ func (r *LendingRepository) BorrowBook(lending *entity.Lending) error {
 	WHERE
 		book_id = $1`
 	err := r.DB.QueryRow(query, lending.BookID).Scan(&totalAvailable)
+	if err != nil {
+		return err
+	}
 	if totalAvailable == 0 {
 		return errors.New("Cant borrow book. All already borrowed")
 	}

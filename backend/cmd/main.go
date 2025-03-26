@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/ramzyrsr/digital-library/config"
 	"github.com/ramzyrsr/digital-library/internal/handler"
@@ -26,10 +27,18 @@ func main() {
 
 	app := fiber.New()
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PUT,DELETE",
+		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
+	}))
+
 	// Define routes
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "Welcome to the Digital Library API!"})
 	})
+
+	api := app.Group("/api/v1")
 
 	// Initialize Repositories & Handlers
 	userRepo := &repository.UserRepository{DB: db}
@@ -42,20 +51,20 @@ func main() {
 	analyticsHandler := &handler.AnalyticsHandler{AnalyticsRepo: analyticsRepo}
 
 	// Auth Routes
-	app.Post("/register", authHandler.Register)
-	app.Post("/login", authHandler.Login)
+	api.Post("/register", authHandler.Register)
+	api.Post("/login", authHandler.Login)
 
-	app.Use(middleware.JWTMiddleware())
-	app.Post("/member", authHandler.CreateMember)
-	app.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
-	app.Get("/books", bookHandler.GetBooks)
-	app.Get("/books/search", bookHandler.GetBooksByTitle)
-	app.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
-	app.Post("/lending/book", middleware.StaffOnlyMiddleware(), lendingHandler.BorrowBook)
-	app.Put("/lending/return/:id", middleware.StaffOnlyMiddleware(), lendingHandler.ReturnBook)
-	app.Get("/analytics/most-borrowed", analyticsHandler.MostBorrowedBooks)
-	app.Get("/analytics/borrowing-trends", analyticsHandler.MonthlyBorrowingTrends)
-	app.Get("/analytics/books-by-category", analyticsHandler.GetBooksByCategory)
+	api.Use(middleware.JWTMiddleware())
+	api.Post("/member", authHandler.CreateMember)
+	api.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
+	api.Get("/books", bookHandler.GetBooks)
+	api.Get("/books/search", bookHandler.GetBooksByTitle)
+	api.Delete("/book/:id", middleware.StaffOnlyMiddleware(), bookHandler.DeleteBook)
+	api.Post("/lending/book", middleware.StaffOnlyMiddleware(), lendingHandler.BorrowBook)
+	api.Put("/lending/return/:id", middleware.StaffOnlyMiddleware(), lendingHandler.ReturnBook)
+	api.Get("/analytics/most-borrowed", analyticsHandler.MostBorrowedBooks)
+	api.Get("/analytics/borrowing-trends", analyticsHandler.MonthlyBorrowingTrends)
+	api.Get("/analytics/books-by-category", analyticsHandler.GetBooksByCategory)
 
 	// Start server
 	port := os.Getenv("PORT")
