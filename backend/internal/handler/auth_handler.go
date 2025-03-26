@@ -31,8 +31,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	existingUser, err := h.UserRepo.GetUserByEmail(req.Email)
-	if err == nil && existingUser != nil {
-		return middleware.Response(c, fiber.StatusConflict, "Email is already registered", nil)
+	if err != nil && err.Error() != "user not found" {
+		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", err.Error())
+	}
+
+	if existingUser != nil {
+		return middleware.Response(c, fiber.StatusUnauthorized, "Email already registered", nil)
 	}
 
 	user := &entity.User{
@@ -63,7 +67,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	user, err := h.UserRepo.GetUserByEmail(req.Email)
 	if err != nil {
-		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", nil)
+		return middleware.Response(c, fiber.StatusUnauthorized, "Invalid email or password", err.Error())
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
