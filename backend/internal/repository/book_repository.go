@@ -12,8 +12,15 @@ type BookRepository struct {
 
 func (r *BookRepository) CreateBook(book *entity.Book) error {
 	query := `INSERT INTO books (title, author, isbn, quantity, category_id, created_by)
-	          VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.DB.Exec(query, book.Title, book.Author, book.ISBN, book.Quantity, book.CategoryID, book.CreatedBy)
+	          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+	err := r.DB.QueryRow(query, book.Title, book.Author, book.ISBN, book.Quantity, book.CategoryID, book.CreatedBy).Scan(&book.ID)
+	if err != nil {
+		return err
+	}
+
+	query = `INSERT INTO book_status (book_id, available_qty, borrowed_qty)
+			 VALUES ($1, $2, $3)`
+	_, err = r.DB.Exec(query, book.ID, book.Quantity, 0)
 
 	return err
 }
