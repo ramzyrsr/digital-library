@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/ramzyrsr/digital-library/internal/entity"
 	"golang.org/x/crypto/bcrypt"
@@ -36,4 +37,21 @@ func (r *UserRepository) GetUserByEmail(email string) (*entity.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (r *UserRepository) CreateMember(user *entity.Member) error {
+	var existingEmail string
+	query := `SELECT email FROM members WHERE email = $1`
+	err := r.DB.QueryRow(query, user.Email).Scan(&existingEmail)
+
+	if err == nil {
+		return errors.New("Email already registered as member")
+	}
+
+	query = `INSERT INTO members (user_id, name, email, phone, status, joined_date)
+			VALUES ($1, $2, $3, $4, $5, NOW())`
+
+	_, err = r.DB.Exec(query, user.UserID, user.Name, user.Email, user.Phone, "active")
+
+	return err
 }
