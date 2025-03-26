@@ -34,12 +34,15 @@ func main() {
 	// Initialize Repositories & Handlers
 	userRepo := &repository.UserRepository{DB: db}
 	authHandler := &handler.AuthHandler{UserRepo: userRepo}
+	bookRepo := &repository.BookRepository{DB: db}
+	bookHandler := &handler.BookHandler{BookRepo: bookRepo}
 
 	// Auth Routes
 	app.Post("/register", authHandler.Register)
 	app.Post("/login", authHandler.Login)
 
 	app.Use(middleware.JWTMiddleware())
+	app.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
 
 	// Start server
 	port := os.Getenv("PORT")
