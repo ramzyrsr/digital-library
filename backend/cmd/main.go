@@ -46,6 +46,7 @@ func main() {
 	app.Post("/login", authHandler.Login)
 
 	app.Use(middleware.JWTMiddleware())
+	app.Post("/member", authHandler.CreateMember)
 	app.Post("/book", middleware.StaffOnlyMiddleware(), bookHandler.CreateBook)
 	app.Get("/books", bookHandler.GetBooks)
 	app.Get("/books/search", bookHandler.GetBooksByTitle)
