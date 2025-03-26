@@ -67,3 +67,33 @@ func (r *AnalyticsRepository) GetMonthlyBorrowingTrends() ([]entity.BorrowingTre
 	return trends, nil
 }
 
+func (r *AnalyticsRepository) GetBooksByCategory() ([]entity.BookCategoryDistribution, error) {
+	query := `SELECT 
+		c.name AS category_name, COUNT(b.id) AS book_count
+	FROM
+		books b
+	JOIN 
+		categories c ON b.category_id = c.id
+	GROUP BY
+		c.name
+	ORDER BY 
+		book_count DESC;
+	`
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []entity.BookCategoryDistribution
+	for rows.Next() {
+		var data entity.BookCategoryDistribution
+		if err := rows.Scan(&data.CategoryName, &data.BookCount); err != nil {
+			return nil, err
+		}
+		results = append(results, data)
+	}
+
+	return results, nil
+}
