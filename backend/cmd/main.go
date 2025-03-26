@@ -54,6 +54,7 @@ func main() {
 	app.Put("/lending/return/:id", middleware.StaffOnlyMiddleware(), lendingHandler.ReturnBook)
 	app.Get("/analytics/most-borrowed", analyticsHandler.MostBorrowedBooks)
 	app.Get("/analytics/borrowing-trends", analyticsHandler.MonthlyBorrowingTrends)
+	app.Get("/analytics/books-by-category", analyticsHandler.GetBooksByCategory)
 
 	// Start server
 	port := os.Getenv("PORT")
